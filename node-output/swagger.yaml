@@ -570,33 +570,9 @@
         } ]
       },
       "ExecutionMetrics" : {
-        "required" : [ "errors", "successful" ],
-        "type" : "object",
-        "properties" : {
-          "successful" : {
-            "type" : "array",
-            "items" : {
-              "example" : [ {
-                "status" : 200,
-                "total" : 1500
-              } ],
-              "allOf" : [ {
-                "$ref" : "#/components/schemas/StatusItem"
-              } ]
-            }
-          },
-          "error" : {
-            "type" : "array",
-            "items" : {
-              "example" : [ {
-                "status" : 500,
-                "total" : 340
-              } ],
-              "allOf" : [ {
-                "$ref" : "#/components/schemas/StatusItem"
-              } ]
-            }
-          }
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/components/schemas/ExecutionMetrics_inner"
         }
       },
       "ExecutionStatus" : {
@@ -672,6 +648,34 @@
             "minimum" : 1,
             "type" : "integer",
             "example" : 100
+          }
+        }
+      },
+      "ExecutionMetrics_inner" : {
+        "type" : "object",
+        "properties" : {
+          "datetime" : {
+            "type" : "string",
+            "format" : "date-time",
+            "example" : "2016-08-29T09:12:33.001Z"
+          },
+          "successful" : {
+            "example" : {
+              "status" : 200,
+              "total" : 1500
+            },
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/StatusItem"
+            } ]
+          },
+          "error" : {
+            "example" : {
+              "status" : 500,
+              "total" : 340
+            },
+            "allOf" : [ {
+              "$ref" : "#/components/schemas/StatusItem"
+            } ]
           }
         }
       }
