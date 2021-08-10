@@ -16,17 +16,9 @@
     "url" : "https://virtserver.swaggerhub.com/ariel17/railgun/1.0.0",
     "description" : "SwaggerHub API Auto Mocking"
   } ],
-  "tags" : [ {
-    "name" : "admins",
-    "description" : "Secured Admin-only calls"
-  }, {
-    "name" : "developers",
-    "description" : "Operations available to regular developers"
-  } ],
   "paths" : {
     "/domains" : {
       "get" : {
-        "tags" : [ "developers" ],
         "summary" : "Shows domains created for account.",
         "description" : "Shows current existent domains, verified or not, created for this\naccount in order to use it as evaluation destination.\n",
         "operationId" : "getDomains",
@@ -73,10 +65,12 @@
           "400" : {
             "description" : "bad input parameter"
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "read" ]
+        } ]
       },
       "post" : {
-        "tags" : [ "developers" ],
         "summary" : "Adds a new domain to verify into account.",
         "description" : "Creates a new domain and adds it to the validation queue.",
         "operationId" : "newDomain",
@@ -107,12 +101,14 @@
           "409" : {
             "description" : "Indicated domain already exists."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "write" ]
+        } ]
       }
     },
     "/domains/{id}" : {
       "get" : {
-        "tags" : [ "developers" ],
         "summary" : "Shows specific domain created for account.",
         "description" : "Shows specific domain by id, if it exists.",
         "operationId" : "getDomain",
@@ -143,10 +139,12 @@
           "404" : {
             "description" : "Domain does not exist on account."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "read" ]
+        } ]
       },
       "delete" : {
-        "tags" : [ "developers" ],
         "summary" : "Removes specific domain created for account.",
         "description" : "Removes specific domain by id, if it exists.",
         "operationId" : "deleteDomain",
@@ -173,12 +171,14 @@
           "409" : {
             "description" : "Domain has related tests in account."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "write" ]
+        } ]
       }
     },
     "/executions" : {
       "get" : {
-        "tags" : [ "developers" ],
         "summary" : "Shows existing execution plans for account and validated domains.",
         "description" : "Obtains the list of existent execution plans for indicated filters.\n",
         "operationId" : "getExecutions",
@@ -237,10 +237,12 @@
           "400" : {
             "description" : "bad input parameter"
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "read" ]
+        } ]
       },
       "post" : {
-        "tags" : [ "developers" ],
         "summary" : "Adds a new execution plan for the indicated domain and resource.",
         "description" : "Creates a new execution plan using a previously configured domain and\nindicated resource path.\n",
         "operationId" : "newExecution",
@@ -271,12 +273,14 @@
           "409" : {
             "description" : "No more than one execution plan for the indicated domain, resource\nand time window is allowed.\n"
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "write" ]
+        } ]
       }
     },
     "/executions/{id}" : {
       "get" : {
-        "tags" : [ "developers" ],
         "summary" : "Shows specific execution plan for validated domain in account.",
         "description" : "Shows specific execution plan by id, if it exists.",
         "operationId" : "getExecution",
@@ -307,10 +311,12 @@
           "404" : {
             "description" : "Execution plan does not exist on account."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "read" ]
+        } ]
       },
       "delete" : {
-        "tags" : [ "developers" ],
         "summary" : "Removes specific execution plan created for account.",
         "description" : "Removes specific execution plan by id, if it exists.",
         "operationId" : "deleteExecution",
@@ -334,12 +340,14 @@
           "404" : {
             "description" : "Execution plan does not exist on account."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "write" ]
+        } ]
       }
     },
     "/executions/{id}/metrics" : {
       "get" : {
-        "tags" : [ "developers" ],
         "summary" : "Shows statistic values for indicated execution plan ID.",
         "description" : "Shows statistics for specific execution plan by id, if it exists.\n",
         "operationId" : "getExecutionMetrics",
@@ -370,12 +378,14 @@
           "404" : {
             "description" : "Execution plan does not exist."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "read" ]
+        } ]
       }
     },
     "/executions/{id}/status" : {
       "get" : {
-        "tags" : [ "developers" ],
         "summary" : "Shows current status of the execution ID.",
         "description" : "Shows current status of the execution plan.\n",
         "operationId" : "getExecutionStatus",
@@ -406,10 +416,12 @@
           "404" : {
             "description" : "Execution plan does not exist."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "read" ]
+        } ]
       },
       "put" : {
-        "tags" : [ "developers" ],
         "summary" : "Shows current status of the execution ID.",
         "description" : "Changes status of the execution plan ID indicated.\n",
         "operationId" : "updateExecutionStatus",
@@ -450,7 +462,10 @@
           "404" : {
             "description" : "Execution plan does not exist."
           }
-        }
+        },
+        "security" : [ {
+          "oAuth2ClientCredentials" : [ "write" ]
+        } ]
       }
     }
   },
@@ -692,6 +707,21 @@
           "minimum" : 1,
           "type" : "integer",
           "format" : "int32"
+        }
+      }
+    },
+    "securitySchemes" : {
+      "oAuth2ClientCredentials" : {
+        "type" : "oauth2",
+        "description" : "This API uses OAuth 2 with the client credentials grant flow.",
+        "flows" : {
+          "clientCredentials" : {
+            "tokenUrl" : "https://ariel17.auth0.com/oauth/token",
+            "scopes" : {
+              "read" : "Read content.",
+              "write" : "Write content."
+            }
+          }
         }
       }
     }
