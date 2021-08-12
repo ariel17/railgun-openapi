@@ -1,729 +1,578 @@
-{
-  "openapi" : "3.0.0",
-  "info" : {
-    "title" : "Railgun API",
-    "description" : "Load testing service API.",
-    "contact" : {
-      "email" : "arielgerardorios@gmail.com"
-    },
-    "license" : {
-      "name" : "Apache 2.0",
-      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
-    },
-    "version" : "1.0.0"
-  },
-  "servers" : [ {
-    "url" : "https://virtserver.swaggerhub.com/ariel17/railgun/1.0.0",
-    "description" : "SwaggerHub API Auto Mocking"
-  } ],
-  "paths" : {
-    "/domains" : {
-      "get" : {
-        "summary" : "Shows domains created for account.",
-        "description" : "Shows current existent domains, verified or not, created for this\naccount in order to use it as evaluation destination.\n",
-        "operationId" : "getDomains",
-        "parameters" : [ {
-          "name" : "page",
-          "in" : "query",
-          "description" : "Page number to show.",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "limit",
-          "in" : "query",
-          "description" : "Maximum number of records to return.",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "maximum" : 50,
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Created domains contained on page number and size.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/DomainItem"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "bad input parameter"
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "read" ]
-        } ]
-      },
-      "post" : {
-        "summary" : "Adds a new domain to verify into account.",
-        "description" : "Creates a new domain and adds it to the validation queue.",
-        "operationId" : "newDomain",
-        "requestBody" : {
-          "description" : "New domain to validate.",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/NewDomainItem"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Domain created.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DomainItem"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "invalid input, object invalid"
-          },
-          "409" : {
-            "description" : "Indicated domain already exists."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "write" ]
-        } ]
-      }
-    },
-    "/domains/{id}" : {
-      "get" : {
-        "summary" : "Shows specific domain created for account.",
-        "description" : "Shows specific domain by id, if it exists.",
-        "operationId" : "getDomain",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "Domain ID value.",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Shows current values for indicated domain ID.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/DomainItem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Domain does not exist on account."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "read" ]
-        } ]
-      },
-      "delete" : {
-        "summary" : "Removes specific domain created for account.",
-        "description" : "Removes specific domain by id, if it exists.",
-        "operationId" : "deleteDomain",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "Resource ID value.",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "The domain was deleted."
-          },
-          "404" : {
-            "description" : "Domain does not exist on account."
-          },
-          "409" : {
-            "description" : "Domain has related tests in account."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "write" ]
-        } ]
-      }
-    },
-    "/executions" : {
-      "get" : {
-        "summary" : "Shows existing execution plans for account and validated domains.",
-        "description" : "Obtains the list of existent execution plans for indicated filters.\n",
-        "operationId" : "getExecutions",
-        "parameters" : [ {
-          "name" : "page",
-          "in" : "query",
-          "description" : "Page number to show.",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "limit",
-          "in" : "query",
-          "description" : "Maximum number of records to return.",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "maximum" : 50,
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }, {
-          "name" : "domain_id",
-          "in" : "query",
-          "description" : "Specific domain_id to filter results by.",
-          "required" : false,
-          "style" : "form",
-          "explode" : true,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Existing execution plans for indicated page and filters.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ExecutionItem"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "bad input parameter"
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "read" ]
-        } ]
-      },
-      "post" : {
-        "summary" : "Adds a new execution plan for the indicated domain and resource.",
-        "description" : "Creates a new execution plan using a previously configured domain and\nindicated resource path.\n",
-        "operationId" : "newExecution",
-        "requestBody" : {
-          "description" : "New execution plan for domain and resource.",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/NewExecutionItem"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Execution plan created.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ExecutionItem"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "invalid input, object invalid, domain_id has peding validation\n"
-          },
-          "409" : {
-            "description" : "No more than one execution plan for the indicated domain, resource\nand time window is allowed.\n"
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "write" ]
-        } ]
-      }
-    },
-    "/executions/{id}" : {
-      "get" : {
-        "summary" : "Shows specific execution plan for validated domain in account.",
-        "description" : "Shows specific execution plan by id, if it exists.",
-        "operationId" : "getExecution",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "Resource ID value.",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Shows current values for indicated execution plan ID.",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ExecutionItem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Execution plan does not exist on account."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "read" ]
-        } ]
-      },
-      "delete" : {
-        "summary" : "Removes specific execution plan created for account.",
-        "description" : "Removes specific execution plan by id, if it exists.",
-        "operationId" : "deleteExecution",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "Resource ID value.",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "The execution plan was deleted."
-          },
-          "404" : {
-            "description" : "Execution plan does not exist on account."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "write" ]
-        } ]
-      }
-    },
-    "/executions/{id}/metrics" : {
-      "get" : {
-        "summary" : "Shows statistic values for indicated execution plan ID.",
-        "description" : "Shows statistics for specific execution plan by id, if it exists.\n",
-        "operationId" : "getExecutionMetrics",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "Resource ID value.",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Shows statistics value for execution plan currently running or\ncompleted.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ExecutionMetrics"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Execution plan does not exist."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "read" ]
-        } ]
-      }
-    },
-    "/executions/{id}/status" : {
-      "get" : {
-        "summary" : "Shows current status of the execution ID.",
-        "description" : "Shows current status of the execution plan.\n",
-        "operationId" : "getExecutionStatus",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "Resource ID value.",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "Shows status value for the execution ID indicated.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ExecutionStatus"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Execution plan does not exist."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "read" ]
-        } ]
-      },
-      "put" : {
-        "summary" : "Shows current status of the execution ID.",
-        "description" : "Changes status of the execution plan ID indicated.\n",
-        "operationId" : "updateExecutionStatus",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "Resource ID value.",
-          "required" : true,
-          "style" : "simple",
-          "explode" : false,
-          "schema" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        } ],
-        "requestBody" : {
-          "description" : "New execution plan status to be applied.",
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/UpdateExecutionStatus"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "202" : {
-            "description" : "The execution plan status change was accepted and will be applied\nshorly.\n",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ExecutionStatus"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Execution plan does not exist."
-          }
-        },
-        "security" : [ {
-          "oAuth2ClientCredentials" : [ "write" ]
-        } ]
-      }
-    }
-  },
-  "components" : {
-    "schemas" : {
-      "BasicDatetimeFields" : {
-        "type" : "object",
-        "properties" : {
-          "created_at" : {
-            "type" : "string",
-            "format" : "date-time",
-            "example" : "2016-08-29T09:12:33.001Z"
-          },
-          "updated_at" : {
-            "type" : "string",
-            "format" : "date-time",
-            "example" : "2016-08-29T09:12:33.001Z"
-          }
-        }
-      },
-      "NewDomainItem" : {
-        "required" : [ "value" ],
-        "type" : "object",
-        "properties" : {
-          "value" : {
-            "type" : "string",
-            "format" : "url",
-            "example" : "example.com"
-          }
-        }
-      },
-      "DomainItem" : {
-        "allOf" : [ {
-          "required" : [ "created_at", "id", "is_verified", "updated_at", "value" ],
-          "type" : "object",
-          "properties" : {
-            "id" : {
-              "type" : "integer",
-              "example" : 1
-            },
-            "is_verified" : {
-              "type" : "boolean"
-            },
-            "code" : {
-              "pattern" : "^a-zA-Z0-9[]()*^{}.-,;:_!º\"\\|?=/&%$<>$",
-              "type" : "string",
-              "example" : "ABC123"
-            }
-          }
-        }, {
-          "$ref" : "#/components/schemas/NewDomainItem"
-        }, {
-          "$ref" : "#/components/schemas/BasicDatetimeFields"
-        } ]
-      },
-      "NewExecutionItem" : {
-        "required" : [ "domain_id", "method", "path", "rpm", "scheduled_at" ],
-        "type" : "object",
-        "properties" : {
-          "domain_id" : {
-            "type" : "integer",
-            "example" : 1
-          },
-          "path" : {
-            "type" : "string",
-            "example" : "/resource/123"
-          },
-          "method" : {
-            "type" : "string",
-            "example" : "GET"
-          },
-          "rpm" : {
-            "minimum" : 1,
-            "type" : "number",
-            "example" : 100.5
-          },
-          "scheduled_at" : {
-            "type" : "string",
-            "format" : "date-time",
-            "example" : "2016-08-29T09:12:33.001Z"
-          },
-          "body" : {
-            "type" : "string",
-            "format" : "byte"
-          },
-          "headers" : {
-            "type" : "array",
-            "items" : {
-              "example" : [ {
-                "name" : "content-type",
-                "value" : "application/json"
-              } ],
-              "allOf" : [ {
-                "$ref" : "#/components/schemas/HeadersItem"
-              } ]
-            }
-          },
-          "timeouts" : {
-            "$ref" : "#/components/schemas/NewExecutionItem_timeouts"
-          }
-        }
-      },
-      "ExecutionItem" : {
-        "required" : [ "body", "created_at", "domain_id", "headers", "id", "method", "path", "rpm", "scheduled_at", "timeouts", "updated_at" ],
-        "allOf" : [ {
-          "type" : "object",
-          "properties" : {
-            "id" : {
-              "type" : "integer",
-              "example" : 1
-            }
-          }
-        }, {
-          "$ref" : "#/components/schemas/NewExecutionItem"
-        }, {
-          "$ref" : "#/components/schemas/BasicDatetimeFields"
-        } ]
-      },
-      "ExecutionMetrics" : {
-        "type" : "array",
-        "items" : {
-          "$ref" : "#/components/schemas/ExecutionMetrics_inner"
-        }
-      },
-      "ExecutionStatus" : {
-        "required" : [ "finished_at", "started_at", "status" ],
-        "type" : "object",
-        "properties" : {
-          "status" : {
-            "type" : "string",
-            "example" : "completed",
-            "enum" : [ "pending", "running", "completed", "cancelling", "cancelled", "failed" ]
-          },
-          "started_at" : {
-            "type" : "string",
-            "format" : "date-time",
-            "example" : "2016-08-29T09:12:33.001Z"
-          },
-          "finished_at" : {
-            "type" : "string",
-            "format" : "date-time",
-            "example" : "2016-08-29T09:12:33.001Z"
-          }
-        }
-      },
-      "UpdateExecutionStatus" : {
-        "required" : [ "status" ],
-        "type" : "object",
-        "properties" : {
-          "status" : {
-            "type" : "string",
-            "example" : "cancelled",
-            "enum" : [ "cancelled" ]
-          }
-        }
-      },
-      "StatusItem" : {
-        "required" : [ "status", "total" ],
-        "type" : "object",
-        "properties" : {
-          "status" : {
-            "maximum" : 599,
-            "minimum" : 100,
-            "type" : "integer",
-            "format" : "int32"
-          },
-          "total" : {
-            "minimum" : 0,
-            "type" : "integer",
-            "format" : "int32"
-          }
-        }
-      },
-      "HeadersItem" : {
-        "required" : [ "name", "value" ],
-        "type" : "object",
-        "properties" : {
-          "name" : {
-            "type" : "string"
-          },
-          "value" : {
-            "type" : "string"
-          }
-        }
-      },
-      "NewExecutionItem_timeouts" : {
-        "type" : "object",
-        "properties" : {
-          "response" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "example" : 1500
-          },
-          "connection" : {
-            "minimum" : 1,
-            "type" : "integer",
-            "example" : 100
-          }
-        }
-      },
-      "ExecutionMetrics_inner" : {
-        "type" : "object",
-        "properties" : {
-          "datetime" : {
-            "type" : "string",
-            "format" : "date-time",
-            "example" : "2016-08-29T09:12:33.001Z"
-          },
-          "successful" : {
-            "example" : {
-              "status" : 200,
-              "total" : 1500
-            },
-            "allOf" : [ {
-              "$ref" : "#/components/schemas/StatusItem"
-            } ]
-          },
-          "error" : {
-            "example" : {
-              "status" : 500,
-              "total" : 340
-            },
-            "allOf" : [ {
-              "$ref" : "#/components/schemas/StatusItem"
-            } ]
-          }
-        }
-      }
-    },
-    "parameters" : {
-      "PathId" : {
-        "name" : "id",
-        "in" : "path",
-        "description" : "Resource ID value.",
-        "required" : true,
-        "style" : "simple",
-        "explode" : false,
-        "schema" : {
-          "minimum" : 1,
-          "type" : "integer",
-          "format" : "int32"
-        }
-      }
-    },
-    "securitySchemes" : {
-      "oAuth2ClientCredentials" : {
-        "type" : "oauth2",
-        "description" : "This API uses OAuth 2 with the client credentials grant flow.",
-        "flows" : {
-          "clientCredentials" : {
-            "tokenUrl" : "https://ariel17.auth0.com/oauth/token",
-            "scopes" : {
-              "read" : "Read content.",
-              "write" : "Write content."
-            }
-          }
-        }
-      }
-    }
-  }
-}
+openapi: 3.0.0
+info:
+  title: Railgun API
+  description: Load testing service API.
+  contact:
+    email: arielgerardorios@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/ariel17/railgun/1.0.0
+  description: SwaggerHub API Auto Mocking
+paths:
+  /domains:
+    get:
+      summary: Shows domains created for account.
+      description: "Shows current existent domains, verified or not, created for this\n\
+        account in order to use it as evaluation destination.\n"
+      operationId: getDomains
+      parameters:
+      - name: page
+        in: query
+        description: Page number to show.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Maximum number of records to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Created domains contained on page number and size.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomainItem'
+        "400":
+          description: bad input parameter
+      security:
+      - oAuth2ClientCredentials:
+        - read
+    post:
+      summary: Adds a new domain to verify into account.
+      description: Creates a new domain and adds it to the validation queue.
+      operationId: newDomain
+      requestBody:
+        description: New domain to validate.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewDomainItem'
+      responses:
+        "201":
+          description: Domain created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainItem'
+        "400":
+          description: "invalid input, object invalid"
+        "409":
+          description: Indicated domain already exists.
+      security:
+      - oAuth2ClientCredentials:
+        - write
+  /domains/{id}:
+    get:
+      summary: Shows specific domain created for account.
+      description: "Shows specific domain by id, if it exists."
+      operationId: getDomain
+      parameters:
+      - name: id
+        in: path
+        description: Domain ID value.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Shows current values for indicated domain ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainItem'
+        "404":
+          description: Domain does not exist on account.
+      security:
+      - oAuth2ClientCredentials:
+        - read
+    delete:
+      summary: Removes specific domain created for account.
+      description: "Removes specific domain by id, if it exists."
+      operationId: deleteDomain
+      parameters:
+      - name: id
+        in: path
+        description: Resource ID value.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      responses:
+        "204":
+          description: The domain was deleted.
+        "404":
+          description: Domain does not exist on account.
+        "409":
+          description: Domain has related tests in account.
+      security:
+      - oAuth2ClientCredentials:
+        - write
+  /executions:
+    get:
+      summary: Shows existing execution plans for account and validated domains.
+      description: |
+        Obtains the list of existent execution plans for indicated filters.
+      operationId: getExecutions
+      parameters:
+      - name: page
+        in: query
+        description: Page number to show.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Maximum number of records to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+      - name: domain_id
+        in: query
+        description: Specific domain_id to filter results by.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Existing execution plans for indicated page and filters.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExecutionItem'
+        "400":
+          description: bad input parameter
+      security:
+      - oAuth2ClientCredentials:
+        - read
+    post:
+      summary: Adds a new execution plan for the indicated domain and resource.
+      description: |
+        Creates a new execution plan using a previously configured domain and
+        indicated resource path.
+      operationId: newExecution
+      requestBody:
+        description: New execution plan for domain and resource.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewExecutionItem'
+      responses:
+        "201":
+          description: Execution plan created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionItem'
+        "400":
+          description: "invalid input, object invalid, domain_id has peding validation\n"
+        "409":
+          description: "No more than one execution plan for the indicated domain,\
+            \ resource\nand time window is allowed.\n"
+      security:
+      - oAuth2ClientCredentials:
+        - write
+  /executions/{id}:
+    get:
+      summary: Shows specific execution plan for validated domain in account.
+      description: "Shows specific execution plan by id, if it exists."
+      operationId: getExecution
+      parameters:
+      - name: id
+        in: path
+        description: Resource ID value.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Shows current values for indicated execution plan ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionItem'
+        "404":
+          description: Execution plan does not exist on account.
+      security:
+      - oAuth2ClientCredentials:
+        - read
+    delete:
+      summary: Removes specific execution plan created for account.
+      description: "Removes specific execution plan by id, if it exists."
+      operationId: deleteExecution
+      parameters:
+      - name: id
+        in: path
+        description: Resource ID value.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      responses:
+        "204":
+          description: The execution plan was deleted.
+        "404":
+          description: Execution plan does not exist on account.
+      security:
+      - oAuth2ClientCredentials:
+        - write
+  /executions/{id}/metrics:
+    get:
+      summary: Shows statistic values for indicated execution plan ID.
+      description: "Shows statistics for specific execution plan by id, if it exists.\n"
+      operationId: getExecutionMetrics
+      parameters:
+      - name: id
+        in: path
+        description: Resource ID value.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: |
+            Shows statistics value for execution plan currently running or
+            completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionMetrics'
+        "404":
+          description: Execution plan does not exist.
+      security:
+      - oAuth2ClientCredentials:
+        - read
+  /executions/{id}/status:
+    get:
+      summary: Shows current status of the execution ID.
+      description: |
+        Shows current status of the execution plan.
+      operationId: getExecutionStatus
+      parameters:
+      - name: id
+        in: path
+        description: Resource ID value.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: |
+            Shows status value for the execution ID indicated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionStatus'
+        "404":
+          description: Execution plan does not exist.
+      security:
+      - oAuth2ClientCredentials:
+        - read
+    put:
+      summary: Shows current status of the execution ID.
+      description: |
+        Changes status of the execution plan ID indicated.
+      operationId: updateExecutionStatus
+      parameters:
+      - name: id
+        in: path
+        description: Resource ID value.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          minimum: 1
+          type: integer
+          format: int32
+      requestBody:
+        description: New execution plan status to be applied.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateExecutionStatus'
+      responses:
+        "202":
+          description: |
+            The execution plan status change was accepted and will be applied
+            shorly.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionStatus'
+        "404":
+          description: Execution plan does not exist.
+      security:
+      - oAuth2ClientCredentials:
+        - write
+components:
+  schemas:
+    BasicDatetimeFields:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+    NewDomainItem:
+      required:
+      - value
+      type: object
+      properties:
+        value:
+          type: string
+          format: url
+          example: example.com
+    DomainItem:
+      allOf:
+      - required:
+        - created_at
+        - id
+        - is_verified
+        - updated_at
+        - value
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+          is_verified:
+            type: boolean
+          code:
+            pattern: "^a-zA-Z0-9[]()*^{}.-,;:_!º\"\\|?=/&%$<>$"
+            type: string
+            example: ABC123
+      - $ref: '#/components/schemas/NewDomainItem'
+      - $ref: '#/components/schemas/BasicDatetimeFields'
+    NewExecutionItem:
+      required:
+      - domain_id
+      - method
+      - path
+      - rpm
+      - scheduled_at
+      type: object
+      properties:
+        domain_id:
+          type: integer
+          example: 1
+        path:
+          type: string
+          example: /resource/123
+        method:
+          type: string
+          example: GET
+        rpm:
+          minimum: 1
+          type: number
+          example: 100.5
+        scheduled_at:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+        body:
+          type: string
+          format: byte
+        headers:
+          type: array
+          items:
+            example:
+            - name: content-type
+              value: application/json
+            allOf:
+            - $ref: '#/components/schemas/HeadersItem'
+        timeouts:
+          $ref: '#/components/schemas/NewExecutionItem_timeouts'
+    ExecutionItem:
+      required:
+      - body
+      - created_at
+      - domain_id
+      - headers
+      - id
+      - method
+      - path
+      - rpm
+      - scheduled_at
+      - timeouts
+      - updated_at
+      allOf:
+      - type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+      - $ref: '#/components/schemas/NewExecutionItem'
+      - $ref: '#/components/schemas/BasicDatetimeFields'
+    ExecutionMetrics:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExecutionMetrics_inner'
+    ExecutionStatus:
+      required:
+      - finished_at
+      - started_at
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+          example: completed
+          enum:
+          - pending
+          - running
+          - completed
+          - cancelling
+          - cancelled
+          - failed
+        started_at:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+        finished_at:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+    UpdateExecutionStatus:
+      required:
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+          example: cancelled
+          enum:
+          - cancelled
+    StatusItem:
+      required:
+      - status
+      - total
+      type: object
+      properties:
+        status:
+          maximum: 599
+          minimum: 100
+          type: integer
+          format: int32
+        total:
+          minimum: 0
+          type: integer
+          format: int32
+    HeadersItem:
+      required:
+      - name
+      - value
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    NewExecutionItem_timeouts:
+      type: object
+      properties:
+        response:
+          minimum: 1
+          type: integer
+          example: 1500
+        connection:
+          minimum: 1
+          type: integer
+          example: 100
+    ExecutionMetrics_inner:
+      type: object
+      properties:
+        datetime:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+        successful:
+          example:
+            status: 200
+            total: 1500
+          allOf:
+          - $ref: '#/components/schemas/StatusItem'
+        error:
+          example:
+            status: 500
+            total: 340
+          allOf:
+          - $ref: '#/components/schemas/StatusItem'
+  parameters:
+    PathId:
+      name: id
+      in: path
+      description: Resource ID value.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        minimum: 1
+        type: integer
+        format: int32
+  securitySchemes:
+    oAuth2ClientCredentials:
+      type: oauth2
+      description: This API uses OAuth 2 with the client credentials grant flow.
+      flows:
+        clientCredentials:
+          tokenUrl: https://ariel17.auth0.com/oauth/token
+          scopes:
+            read: Read content.
+            write: Write content.
