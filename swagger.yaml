@@ -11,9 +11,75 @@ info:
 servers:
 - url: https://virtserver.swaggerhub.com/ariel17/railgun/1.0.0
   description: SwaggerHub API Auto Mocking
+tags:
+- name: Management
+  description: Endpoints related to identity management.
+- name: Service
+  description: Functionallity related to load testing tasks.
 paths:
+  /credentials:
+    get:
+      tags:
+      - Management
+      summary: Shows active client credentials for OAuth 2 authorization.
+      description: |
+        Shows existent keys for OAuth 2 client credentials authentication flow.
+      operationId: getCredentials
+      parameters:
+      - name: page
+        in: query
+        description: Page number to show.
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: Maximum number of records to return.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Created domains contained on page number and size.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialItem'
+        "404":
+          description: Credentials does not exist on account.
+      security:
+      - oAuth2ClientCredentials:
+        - read
+    post:
+      tags:
+      - Management
+      summary: Creates new credentials for OAuth 2 authentication flow.
+      description: |
+        Creates a new pair of credentials to use in OAuth 2 authentication flow.
+      operationId: newCredentials
+      responses:
+        "201":
+          description: New credentials created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialItem'
+      security:
+      - oAuth2ClientCredentials:
+        - write
   /domains:
     get:
+      tags:
+      - Service
       summary: Shows domains created for account.
       description: "Shows current existent domains, verified or not, created for this\n\
         account in order to use it as evaluation destination.\n"
@@ -55,6 +121,8 @@ paths:
       - oAuth2ClientCredentials:
         - read
     post:
+      tags:
+      - Service
       summary: Adds a new domain to verify into account.
       description: Creates a new domain and adds it to the validation queue.
       operationId: newDomain
@@ -80,6 +148,8 @@ paths:
         - write
   /domains/{id}:
     get:
+      tags:
+      - Service
       summary: Shows specific domain created for account.
       description: "Shows specific domain by id, if it exists."
       operationId: getDomain
@@ -107,6 +177,8 @@ paths:
       - oAuth2ClientCredentials:
         - read
     delete:
+      tags:
+      - Service
       summary: Removes specific domain created for account.
       description: "Removes specific domain by id, if it exists."
       operationId: deleteDomain
@@ -133,6 +205,8 @@ paths:
         - write
   /executions:
     get:
+      tags:
+      - Service
       summary: Shows existing execution plans for account and validated domains.
       description: |
         Obtains the list of existent execution plans for indicated filters.
@@ -184,6 +258,8 @@ paths:
       - oAuth2ClientCredentials:
         - read
     post:
+      tags:
+      - Service
       summary: Adds a new execution plan for the indicated domain and resource.
       description: |
         Creates a new execution plan using a previously configured domain and
@@ -212,6 +288,8 @@ paths:
         - write
   /executions/{id}:
     get:
+      tags:
+      - Service
       summary: Shows specific execution plan for validated domain in account.
       description: "Shows specific execution plan by id, if it exists."
       operationId: getExecution
@@ -239,6 +317,8 @@ paths:
       - oAuth2ClientCredentials:
         - read
     delete:
+      tags:
+      - Service
       summary: Removes specific execution plan created for account.
       description: "Removes specific execution plan by id, if it exists."
       operationId: deleteExecution
@@ -263,6 +343,8 @@ paths:
         - write
   /executions/{id}/metrics:
     get:
+      tags:
+      - Service
       summary: Shows statistic values for indicated execution plan ID.
       description: "Shows statistics for specific execution plan by id, if it exists.\n"
       operationId: getExecutionMetrics
@@ -293,6 +375,8 @@ paths:
         - read
   /executions/{id}/status:
     get:
+      tags:
+      - Service
       summary: Shows current status of the execution ID.
       description: |
         Shows current status of the execution plan.
@@ -322,6 +406,8 @@ paths:
       - oAuth2ClientCredentials:
         - read
     put:
+      tags:
+      - Service
       summary: Shows current status of the execution ID.
       description: |
         Changes status of the execution plan ID indicated.
@@ -370,6 +456,18 @@ components:
           type: string
           format: date-time
           example: 2016-08-29T09:12:33.001Z
+    CredentialItem:
+      required:
+      - client_id
+      - client_secret
+      type: object
+      properties:
+        client_id:
+          type: string
+          example: qwerty
+        client_secret:
+          type: string
+          example: asdfg
     NewDomainItem:
       required:
       - value
@@ -572,7 +670,7 @@ components:
       description: This API uses OAuth 2 with the client credentials grant flow.
       flows:
         clientCredentials:
-          tokenUrl: https://ariel17.auth0.com/oauth/token
+          tokenUrl: https://ariel17.auth0.com/oauth/token?audience=https%3A%2F%2Frailgun.ariel17.com.ar
           scopes:
             read: Read content.
             write: Write content.
