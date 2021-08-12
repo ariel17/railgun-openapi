@@ -37,11 +37,22 @@
     <script src="./dist/swagger-ui-standalone-preset.js" charset="UTF-8"> </script>
     <script>
     window.onload = function() {
+      const audience = 'https://railgun.ariel17.com.ar';
       // Begin Swagger UI call region
       const ui = SwaggerUIBundle({
         url: "swagger.yaml",
         dom_id: '#swagger-ui',
         validatorUrl: null,
+        requestInterceptor: (request) => {
+          if (request.url.includes('oauth/token')) {
+            return {
+              ...request,
+              body: `${request.body}&audience=${audience}`
+            }
+          } else {
+            return request
+          }
+        },
         deepLinking: true,
         presets: [
           SwaggerUIBundle.presets.apis,
